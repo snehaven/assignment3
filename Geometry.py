@@ -163,38 +163,90 @@ class Cube (object):
   # and side. The faces of the Cube are parallel to x-y, y-z,
   # and x-z planes.
   def __init__ (self, x = 0, y = 0, z = 0, side = 1):
+    self.x = x
+    self.y = y
+    self.z = z
+    self.s = side
+    self.center = Point( x, y, z )
+    self.side = side
+
+    self.x2 = self.x + 0.5 * self.s
+    self.x3 = self.x - 0.5 * self.s
+    self.y2 = self.y + 0.5 * self.s
+    self.y3 = self.y - 0.5 * self.s
+    self.z2 = self.z + 0.5 * self.s
+    self.z3 = self.z - 0.5 * self.s
+
+    self.points =  [ [self.x2, self.y2, self.z2], [self.x2, self.y2, self.z3], \
+                     [self.x2, self.y3, self.z2], [self.x2, self.y3, self.z3], \
+                     [self.x3, self.y2, self.z2], [self.x3, self.y2, self.z3], \
+                     [self.x3, self.y3, self.z2], [self.x3, self.y3, self.z3] ]
 
   # string representation of a Cube of the form:
   # Center: (x, y, z), Side: value
   def __str__ (self):
+    center = str( float(self.x) ) + ", " + str( float(self.y) ) + ", " + str( float(self.z) )
+    return "Center: (" + center + "), Side: " + str( float(self.s) )
 
   # compute the total surface area of Cube (all 6 sides)
   # returns a floating point number
   def area (self):
+    return self.s ** 2 * 6
 
   # compute volume of a Cube
   # returns a floating point number
   def volume (self):
-
+    return self.s ** 3
+  
   # determines if a Point is strictly inside this Cube
   # p is a point object
   # returns a Boolean
   def is_inside_point (self, p):
+    if p.x < self.x2 and p.x > self.x3 and p.y < self.y2 and p.y > self.y3 and p.z < self.z2 and p.z > self.z3 :
+      return True
+    else:
+      return False
 
   # determine if a Sphere is strictly inside this Cube
   # a_sphere is a Sphere object
   # returns a Boolean
   def is_inside_sphere (self, a_sphere):
+    if a_sphere.r < self.s:
+      if a_sphere.x + a_sphere.r < self.x2 and a_sphere.x - a_sphere.r > self.x3:
+        if a_sphere.y + a_sphere.r < self.y2 and a_sphere.y - a_sphere.r > self.y3:
+          if a_sphere.z + a_sphere.r < self.z2 and a_sphere.z - a_sphere.r > self.z3:
+            return True
+    return False
 
   # determine if another Cube is strictly inside this Cube
   # other is a Cube object
   # returns a Boolean
   def is_inside_cube (self, other):
+    if other.s < self.s:
+      for point in other.points:
+        p = Point( point[0], point[1], point[2] )
+        if not Cube.is_inside_point( self, p ):
+          return False
+      return True
+    return False
 
   # determine if a Cylinder is strictly inside this Cube
   # a_cyl is a Cylinder object
   # returns a Boolean
   def is_inside_cylinder (self, a_cyl):
+    x2 = a_cyl.x + a_cyl.r
+    x3 = a_cyl.x - a_cyl.r
+    y2 = a_cyl.y + a_cyl.r
+    y3 = a_cyl.y - a_cyl.r
+    z2 = a_cyl.z + 0.5 * a_cyl.h
+    z3 = a_cyl.z - 0.5 * a_cyl.h
+    cyl_points = [ [ x2, y2, z2 ], [ x2, y2, z3 ], [ x2, y3, z2 ], [ x2, y3, z3 ], \
+                   [ x3, y2, z2 ], [ x3, y2, z3 ], [ x3, y3, z2 ], [ x3, y3, z3 ] ]
+    for point in cyl_points:
+      p = Point( point[0], point[1], point[2] )
+      if not Cube.is_inside_point( self, p ):
+        return False
+    return True
 
   # determine if another Cube intersects this Cube
   # two Cube objects intersect if they are not strictly
@@ -202,12 +254,26 @@ class Cube (object):
   # other is a Cube object
   # returns a Boolean
   def does_intersect_cube (self, other):
+    if not Cube.is_inside_cube (self, other):
+      if abs( self.z - other.z ) <= ( 0.5 * self.s + 0.5 * other.s ):
+        if abs( self.x - other.x ) <= ( 0.5 * self.s + 0.5 * other.s ):
+          if abs( self.y - other.y ) <= ( 0.5 * self.s + 0.5 * other.s ):
+            return True
+    return False
 
   # determine the volume of intersection if this Cube
   # intersects with another Cube
   # other is a Cube object
   # returns a floating point number
   def intersection_volume (self, other):
+    if Cube.does_intersect_cube (self, other):
+      length = min( self.x2, other.x2 ) - max( self.x3, other.x3 )
+      if length == 0:
+        length = min( self.y2, other.y2 ) - max( self.y3, other.y3 )
+        if length == 0:
+          length = min( self.z2, other.z2 ) - max( self.z3, other.z3 )
+      return length ** 3
+    return 0
 
   # return the largest Sphere object that is inscribed
   # by this Cube
@@ -215,34 +281,59 @@ class Cube (object):
   # Cube are tangential planes of the Sphere
   # returns a Sphere object
   def inscribe_sphere (self):
+    sphere = Sphere( self.x, self.y, self.z, 0.5 * self.s )
+    return sphere
 
 class Cylinder (object):
   # Cylinder is defined by its center (which is a Point object),
   # radius and height. The main axis of the Cylinder is along the
   # z-axis and height is measured along this axis
   def __init__ (self, x = 0, y = 0, z = 0, radius = 1, height = 1):
+    self.x = x
+    self.y = y
+    self.z = z
+    self.r = radius
+    self.h = height
 
   # returns a string representation of a Cylinder of the form:
   # Center: (x, y, z), Radius: value, Height: value
   def __str__ (self):
+    center = str( float(self.x) ) + ", " + str( float(self.y) ) + ", " + str( float(self.z) )
+    return "Center: (" + center + "), Radius: " + str( float(self.r) ) + ", Height: " + str( float(self.h) )
 
   # compute surface area of Cylinder
   # returns a floating point number
   def area (self):
+    return 2 * math.pi * self.r * self.h + 2 * math.pi * (self.r ** 2)
 
   # compute volume of a Cylinder
   # returns a floating point number
   def volume (self):
+    return math.pi * self.r ** 2 * self.h
 
   # determine if a Point is strictly inside this Cylinder
   # p is a Point object
   # returns a Boolean
   def is_inside_point (self, p):
+    point1 = Point ( self.x, self.y, self.z )
+    point2 = Point ( p.x, p.y, self.z )
+    if point1.distance( point2 ) < self.r:
+      if p.z < ( self.z + 0.5 * self.h ) and p.z > ( self.z - 0.5 * self.h ):
+        return True
+    return False
 
   # determine if a Sphere is strictly inside this Cylinder
   # a_sphere is a Sphere object
   # returns a Boolean
   def is_inside_sphere (self, a_sphere):
+    if ( a_sphere.x + a_sphere.r ) < ( self.x + self.r) and \
+       ( a_sphere.x - a_sphere.r ) > ( self.x - self.r) and \
+       ( a_sphere.z + a_sphere.r ) < ( self.z + self.h) and \
+       ( a_sphere.z - a_sphere.r ) > ( self.z - self.h) and \
+       ( a_sphere.y + a_sphere.r ) < ( self.y + self.r) and \
+       ( a_sphere.y - a_sphere.r ) > ( self.y - self.r):
+      return True
+    return False
 
   # determine if a Cube is strictly inside this Cylinder
   # determine if all eight corners of the Cube are inside
@@ -250,11 +341,25 @@ class Cylinder (object):
   # a_cube is a Cube object
   # returns a Boolean
   def is_inside_cube (self, a_cube):
+    for point in a_cube.points:
+      p = Point( point[0], point[1], point[2] )
+      if not Cylinder.is_inside_point( self, p ):
+        return False
+    return True
 
   # determine if another Cylinder is strictly inside this Cylinder
   # other is Cylinder object
   # returns a Boolean
   def is_inside_cylinder (self, other):
+    if ( other.x + other.r ) < ( self.x + self.r) and \
+       ( other.x - other.r ) > ( self.x - self.r) and \
+       ( other.z + other.h ) < ( self.z + self.h) and \
+       ( other.z - other.h ) > ( self.z - self.h) and \
+       ( other.y + other.r ) < ( self.y + self.r) and \
+       ( other.y - other.r ) > ( self.y - self.r):
+      return True
+    else:
+      return False
 
   # determine if another Cylinder intersects this Cylinder
   # two Cylinder object intersect if they are not strictly
@@ -262,6 +367,12 @@ class Cylinder (object):
   # other is a Cylinder object
   # returns a Boolean
   def does_intersect_cylinder (self, other):
+    if not Cylinder.is_inside_cylinder (self, other):
+      if abs( self.z - other.z ) <= ( 0.5 * self.h + 0.5 * other.h ):
+        if abs( self.x - other.x ) <= ( self.r + other.r ):
+          if abs( self.y - self.y ) <= ( self.r + other.r ):
+            return True
+    return False
 
 def main():
   # read data from standard input
