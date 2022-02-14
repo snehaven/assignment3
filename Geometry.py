@@ -431,7 +431,7 @@ def main():
   cylA = Cylinder(float(cylA[0]), float(cylA[1]), float(cylA[2]), float(cylA[3]), float(cylA[4]))
 
   # read the coordinates of the center, radius and height of cylB
-  cylB = data_list[6].split()
+  cylB = data_list[7].split()
   # create a Cylinder object
   cylB = Cylinder(float(cylB[0]), float(cylB[1]), float(cylB[2]), float(cylB[3]), float(cylB[4]))
 
@@ -557,13 +557,10 @@ def main():
       print("cylB is not inside cylA")
 
   # print if cylB intersects with cylA
-  cylB_intersects_cylA = "does" if cylA.does_intersect_cylinder ( cylB ) else "does not"
-  print( "cylB", cylB_intersects_cylA, "intersect cylA")
-	
-  #if (cylA.does_intersect_cylinder(cylB)):
-      #print("cylB does intersect cylA")
-  #else:
-      #print("cylB does not intersect cylA")
+  if (cylA.does_intersect_cylinder(cylB)):
+      print("cylB does intersect cylA")
+  else:
+      print("cylB does not intersect cylA")
 
 if __name__ == "__main__":
   main()
