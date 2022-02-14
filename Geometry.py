@@ -557,10 +557,13 @@ def main():
       print("cylB is not inside cylA")
 
   # print if cylB intersects with cylA
-  if (cylA.does_intersect_cylinder(cylB)):
-      print("cylB does intersect cylA")
-  else:
-      print("cylB does not intersect cylA")
+  cylB_intersects_cylA = "does" if cylA.does_intersect_cylinder ( cylB ) else "does not"
+  print( "cylB", cylB_intersects_cylA, "intersect cylA")
+	
+  #if (cylA.does_intersect_cylinder(cylB)):
+      #print("cylB does intersect cylA")
+  #else:
+      #print("cylB does not intersect cylA")
 
 if __name__ == "__main__":
   main()
