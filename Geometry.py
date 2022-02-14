@@ -31,20 +31,20 @@ class Point (object):
   # create a string representation of a Point
   # returns a string of the form (x, y, z)
   def __str__ (self):
-      print("(" + str(self.x) + ", " + str(self.y) + ", " + str(self.z) + ")")
+      return str("(" + str(float(self.x)) + ", " + str(float(self.y)) + ", " + str(float(self.z)) + ")")
 
   # get distance to another Point object
   # other is a Point object
   # returns the distance as a floating point number
   def distance (self, other):
-      return (sqrt((self.x-other.x ** 2) + (self.y-other.y ** 2) + (self.z-other.z ** 2)))
+      return (math.sqrt(((self.x-other.x) ** 2) + ((self.y-other.y) ** 2) + ((self.z-other.z) ** 2)))
 
   # test for equality between two points
   # other is a Point object
   # returns a Boolean
   def __eq__ (self, other):
       tol = 10e-6
-      return (distance(self, other)  < tol)
+      return (self.distance(other)  < tol)
 
 
 class Sphere (object):
@@ -59,7 +59,7 @@ class Sphere (object):
   # returns string representation of a Sphere of the form:
   # Center: (x, y, z), Radius: value
   def __str__ (self):
-      print("Center: (" + str(self.x) + ", " + str(self.y) + ", " + str(self.z) + ") Radius: " + str(self.radius))
+      return str("Center: (" + str(float(self.x)) + ", " + str(float(self.y)) + ", " + str(float(self.z)) + "), Radius: " + str(float(self.radius)))
 
 
   # compute surface area of Sphere
@@ -80,13 +80,13 @@ class Sphere (object):
 
   # determine distance between centers of two spheres
   def origin_distance (self, other):
-      return (sqrt(((self.x-other.x) ** 2) + ((self.y-other.y) ** 2) + ((self.z-other.z) ** 2)))
+      return (math.sqrt(((self.x-other.x) ** 2) + ((self.y-other.y) ** 2) + ((self.z-other.z) ** 2)))
 
   # determine if another Sphere is strictly inside this Sphere
   # other is a Sphere object
   # returns a Boolean
   def is_inside_sphere (self, other):
-      return other.radius < (self.radius - origin_distance(other))
+      return other.radius < (self.radius - self.origin_distance(other))
 
   # determine if a Cube is strictly inside this Sphere
   # determine if the eight corners of the Cube are strictly
@@ -126,14 +126,19 @@ class Sphere (object):
   # a_cyl is a Cylinder object
   # returns a Boolean
   def is_inside_cyl (self, a_cyl):
-      if (a_cyl.height > self.radius ** 2):
+      x2 = a_cyl.x + a_cyl.r
+      x3 = a_cyl.x - a_cyl.r
+      y2 = a_cyl.y + a_cyl.r
+      y3 = a_cyl.y - a_cyl.r
+      z2 = a_cyl.z + 0.5 * a_cyl.h
+      z3 = a_cyl.z - 0.5 * a_cyl.h
+      cyl_points = [ [ x2, y2, z2 ], [ x2, y2, z3 ], [ x2, y3, z2 ], [ x2, y3, z3 ], \
+                     [ x3, y2, z2 ], [ x3, y2, z3 ], [ x3, y3, z2 ], [ x3, y3, z3 ] ]
+      for point in cyl_points:
+        p = Point( point[0], point[1], point[2] )
+        if not self.is_inside_point(p):
           return False
-
-      distance = sqrt(((self.x-a_cyl.x) ** 2) + ((self.y-a_cyl.y) ** 2))
-      radius_top = sqrt(self.radius ** 2 - (a_cyl.height/2 + a_cyl.z - self.z) ** 2)
-      radius_bottom = sqrt(self.radius ** 2 - (a_cyl.height/2 - a_cyl.z - self.z) ** 2)
-
-      return (radius_top > (distance + a_cyl.radius)) & (radius_bottom > (distance + a_cyl.radius))
+      return True
 
   # determine if another Sphere intersects this Sphere
   # other is a Sphere object
@@ -141,7 +146,7 @@ class Sphere (object):
   # or not strictly outside each other
   # returns a Boolean
   def does_intersect_sphere (self, other):
-      return origin_distance(other) < (self.radius + other.radius)
+      return (self.origin_distance(other) < (self.radius + other.radius)) & (self.is_inside_sphere(other) == False)
 
   # determine if a Cube intersects this Sphere
   # the Cube and Sphere intersect if they are not
@@ -149,14 +154,18 @@ class Sphere (object):
   # a_cube is a Cube object
   # returns a Boolean
   def does_intersect_cube (self, a_cube):
-      return origin_distance(other) < (self.radius + other.side/2)
+	  if (self.is_inside_cube(a_cube)):
+	  	return False
+
+	  return (self.origin_distance(a_cube) < (self.radius + a_cube.side/2))
+
 
   # return the largest Cube object that is circumscribed
   # by this Sphere
   # all eight corners of the Cube are on the Sphere
   # returns a Cube object
   def circumscribe_cube (self):
-      return Cube(self.x, self.y, self.z, ((self.radius*2)/sqrt(3)))
+      return Cube(self.x, self.y, self.z, ((self.radius*2)/math.sqrt(3)))
 
 class Cube (object):
   # Cube is defined by its center (which is a Point object)
@@ -197,7 +206,7 @@ class Cube (object):
   # returns a floating point number
   def volume (self):
     return self.s ** 3
-  
+
   # determines if a Point is strictly inside this Cube
   # p is a point object
   # returns a Boolean
@@ -211,10 +220,10 @@ class Cube (object):
   # a_sphere is a Sphere object
   # returns a Boolean
   def is_inside_sphere (self, a_sphere):
-    if a_sphere.r < self.s:
-      if a_sphere.x + a_sphere.r < self.x2 and a_sphere.x - a_sphere.r > self.x3:
-        if a_sphere.y + a_sphere.r < self.y2 and a_sphere.y - a_sphere.r > self.y3:
-          if a_sphere.z + a_sphere.r < self.z2 and a_sphere.z - a_sphere.r > self.z3:
+    if a_sphere.radius < self.s:
+      if a_sphere.x + a_sphere.radius < self.x2 and a_sphere.x - a_sphere.radius > self.x3:
+        if a_sphere.y + a_sphere.radius < self.y2 and a_sphere.y - a_sphere.radius > self.y3:
+          if a_sphere.z + a_sphere.radius < self.z2 and a_sphere.z - a_sphere.radius > self.z3:
             return True
     return False
 
@@ -309,7 +318,7 @@ class Cylinder (object):
   # compute volume of a Cylinder
   # returns a floating point number
   def volume (self):
-    return math.pi * self.r ** 2 * self.h
+    return math.pi * (self.r ** 2) * self.h
 
   # determine if a Point is strictly inside this Cylinder
   # p is a Point object
@@ -326,12 +335,12 @@ class Cylinder (object):
   # a_sphere is a Sphere object
   # returns a Boolean
   def is_inside_sphere (self, a_sphere):
-    if ( a_sphere.x + a_sphere.r ) < ( self.x + self.r) and \
-       ( a_sphere.x - a_sphere.r ) > ( self.x - self.r) and \
-       ( a_sphere.z + a_sphere.r ) < ( self.z + self.h) and \
-       ( a_sphere.z - a_sphere.r ) > ( self.z - self.h) and \
-       ( a_sphere.y + a_sphere.r ) < ( self.y + self.r) and \
-       ( a_sphere.y - a_sphere.r ) > ( self.y - self.r):
+    if ( a_sphere.x + a_sphere.radius ) < ( self.x + self.r) and \
+       ( a_sphere.x - a_sphere.radius ) > ( self.x - self.r) and \
+       ( a_sphere.z + a_sphere.radius ) < ( self.z + self.h) and \
+       ( a_sphere.z - a_sphere.radius ) > ( self.z - self.h) and \
+       ( a_sphere.y + a_sphere.radius ) < ( self.y + self.r) and \
+       ( a_sphere.y - a_sphere.radius ) > ( self.y - self.r):
       return True
     return False
 
@@ -383,13 +392,13 @@ def main():
   p = data_list[0].split()
 
   # create a Point object
-  p = Point(float(p[0]), float(p[1]), float(p[2])
+  p = Point(float(p[0]), float(p[1]), float(p[2]))
 
   # read the coordinates of the second Point q
   q = data_list[1].split()
 
   # create a Point object
-  p = Point(float(q[0]), float(q[1]), float(q[2]))
+  q = Point(float(q[0]), float(q[1]), float(q[2]))
 
   # read the coordinates of the center and radius of sphereA
   sphereA = data_list[2].split()
@@ -419,12 +428,12 @@ def main():
   cylA = data_list[6].split()
 
   # create a Cylinder object
-  cylA = Cylinder(float(cylA[0]), float(cylA[1]), float(cylA[2]), float(cylA[3]))
+  cylA = Cylinder(float(cylA[0]), float(cylA[1]), float(cylA[2]), float(cylA[3]), float(cylA[4]))
 
   # read the coordinates of the center, radius and height of cylB
   cylB = data_list[6].split()
   # create a Cylinder object
-  cylB = Cylinder(float(cylB[0]), float(cylB[1]), float(cylB[2]), float(cylB[3]))
+  cylB = Cylinder(float(cylB[0]), float(cylB[1]), float(cylB[2]), float(cylB[3]), float(cylB[4]))
 
   #origin Point
   origin = Point(0,0,0)
@@ -433,7 +442,7 @@ def main():
   # than the distance of q from the origin
   if (p.distance(origin) > q.distance(origin)):
       print("Distance of Point p from the origin is greater than the distance of Point q from the origin")
-   else:
+  else:
       print("Distance of Point p from the origin is not greater than the distance of Point q from the origin")
 
   # print if Point p is inside sphereA
@@ -445,7 +454,7 @@ def main():
   # print if sphereB is inside sphereA
   if (sphereA.is_inside_sphere(sphereB)):
       print("sphereB is inside sphereA")
-   else:
+  else:
       print("sphereB is not inside sphereA")
 
   # print if cubeA is inside sphereA
@@ -498,7 +507,7 @@ def main():
       print("cubeB is not inside cubeA")
 
   # print if cylA is inside cubeA
-  if (cubeA.is_inside_cyl(cylA)):
+  if (cubeA.is_inside_cylinder(cylA)):
       print("cylA is inside cubeA")
   else:
       print("cylA is not inside cubeA")
@@ -542,7 +551,7 @@ def main():
       print("cubeA is not inside cylA")
 
   # print if cylB is inside cylA
-  if (cylA.is_inside_cyl(cylB)):
+  if (cylA.is_inside_cylinder(cylB)):
       print("cylB is inside cylA")
   else:
       print("cylB is not inside cylA")
