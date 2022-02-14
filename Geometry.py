@@ -95,14 +95,14 @@ class Sphere (object):
   # returns a Boolean
   def is_inside_cube (self, a_cube):
       side = a_cube.side/2
-      point_1 = Point(a_cube.x - , a_cube.y + side, (a_cube.z - side))
-      point_2 = Point(a_cube.x - side , a_cube.y - side, (a_cube.z - side))
+      point_1 = Point(a_cube.x - side, a_cube.y + side, (a_cube.z - side))
+      point_2 = Point(a_cube.x - side, a_cube.y - side, (a_cube.z - side))
       point_3 = Point(a_cube.x + side, a_cube.y - side, (a_cube.z - side))
-      point_4 = Point(a_cube.x + , a_cube.y + side, (a_cube.z - side))
-      point_5 = Point(a_cube.x - , a_cube.y + side, (a_cube.z + side))
+      point_4 = Point(a_cube.x + side, a_cube.y + side, (a_cube.z - side))
+      point_5 = Point(a_cube.x - side, a_cube.y + side, (a_cube.z + side))
       point_6 = Point(a_cube.x - side , a_cube.y - side, (a_cube.z + side))
       point_7 = Point(a_cube.x + side, a_cube.y - side, (a_cube.z + side))
-      point_8 = Point(a_cube.x + , a_cube.y + side, (a_cube.z + side))
+      point_8 = Point(a_cube.x + side, a_cube.y + side, (a_cube.z + side))
       if (!self.is_inside_point(point_1)):
           return False
       if (!self.is_inside_point(point_2)):
