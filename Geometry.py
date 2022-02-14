@@ -103,21 +103,21 @@ class Sphere (object):
       point_6 = Point(a_cube.x - side , a_cube.y - side, (a_cube.z + side))
       point_7 = Point(a_cube.x + side, a_cube.y - side, (a_cube.z + side))
       point_8 = Point(a_cube.x + side, a_cube.y + side, (a_cube.z + side))
-      if (!self.is_inside_point(point_1)):
+      if (self.is_inside_point(point_1) == False):
           return False
-      if (!self.is_inside_point(point_2)):
+      if (self.is_inside_point(point_2) == False):
           return False
-      if (!self.is_inside_point(point_3)):
+      if (self.is_inside_point(point_3) == False):
           return False
-      if (!self.is_inside_point(point_4)):
+      if (self.is_inside_point(point_4) == False):
           return False
-      if (!self.is_inside_point(point_5)):
+      if (self.is_inside_point(point_5) == False):
           return False
-      if (!self.is_inside_point(point_6)):
+      if (self.is_inside_point(point_6) == False):
           return False
-      if (!self.is_inside_point(point_7)):
+      if (self.is_inside_point(point_7) == False):
           return False
-      if (!self.is_inside_point(point_8)):
+      if (self.is_inside_point(point_8) == False):
           return False
 
       return True
