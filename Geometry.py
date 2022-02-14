@@ -54,6 +54,7 @@ class Sphere (object):
       self.y = y
       self.z = z
       self.radius = radius
+      self.center = Point(x,y,z)
 
 
   # returns string representation of a Sphere of the form:
